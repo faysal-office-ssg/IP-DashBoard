@@ -25,6 +25,26 @@ def get_ping_command(ip_address: str):
     return ["ping", "-c", "1", ip_address]
 
 
+def extract_ping_response_ms(output: str):
+    if not output:
+        return None
+
+    patterns = [
+        r"time[<= ]+(\d+(?:\.\d+)?)\s*ms",
+        r"rtt\s+min/avg/max.*?=\s*\d+(?:\.\d+)?/\s*(\d+(?:\.\d+)?)/\d+(?:\.\d+)?/\d+(?:\.\d+)?\s*ms",
+        r"avg\s*=\s*(\d+(?:\.\d+)?)\s*ms",
+    ]
+
+    for pattern in patterns:
+        match = re.search(pattern, output, re.IGNORECASE)
+        if match:
+            try:
+                return int(float(match.group(1)))
+            except (TypeError, ValueError):
+                continue
+    return None
+
+
 def ping_ip(ip_address: str):
     command = get_ping_command(ip_address)
     try:
@@ -40,15 +60,7 @@ def ping_ip(ip_address: str):
 
     output = (result.stdout or "") + (result.stderr or "")
     success = result.returncode == 0
-    response_ms = None
-
-    if output:
-        match = re.search(r"time[<= ]+(\d+(?:\.\d+)?)\s*ms", output, re.IGNORECASE)
-        if match:
-            try:
-                response_ms = int(float(match.group(1)))
-            except ValueError:
-                response_ms = None
+    response_ms = extract_ping_response_ms(output)
 
     return success, response_ms, output.strip() or ("ping succeeded" if success else "ping failed")
 
