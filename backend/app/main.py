@@ -18,7 +18,7 @@ APP_TITLE = os.getenv("APP_TITLE", "Office IP Monitor")
 APP_VERSION = os.getenv("APP_VERSION", "1.0.0")
 FRONTEND_ORIGINS = [
     origin.strip()
-    for origin in os.getenv("FRONTEND_ORIGINS", "http://localhost:5500,http://127.0.0.1:5500").split(",")
+    for origin in os.getenv("FRONTEND_ORIGINS", "http://localhost:5500,http://127.0.0.1:5500,http://192.168.25.50:5500").split(",")
     if origin.strip()
 ]
 
