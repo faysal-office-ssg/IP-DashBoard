@@ -1,4 +1,5 @@
 import os
+import asyncio
 from contextlib import asynccontextmanager
 from datetime import datetime
 
@@ -18,7 +19,7 @@ APP_TITLE = os.getenv("APP_TITLE", "Office IP Monitor")
 APP_VERSION = os.getenv("APP_VERSION", "1.0.0")
 FRONTEND_ORIGINS = [
     origin.strip()
-    for origin in os.getenv("FRONTEND_ORIGINS", "http://localhost:5500,http://127.0.0.1:5500,http://192.168.25.50:5500").split(",")
+    for origin in os.getenv("FRONTEND_ORIGINS", "http://localhost:5500,http://127.0.0.1:5500,http://172.20.30.148:5500").split(",")
     if origin.strip()
 ]
 
@@ -171,7 +172,7 @@ async def ping_device(device_id: int, db: Session = Depends(get_db)):
     if not device:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Device not found")
 
-    result = await ping_device_once(device_id)
+    result = await asyncio.to_thread(ping_device_once, device_id)
     return PingResult(
         device_id=device_id,
         status=result["status"],

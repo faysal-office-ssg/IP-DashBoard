@@ -12,7 +12,7 @@ DeviceStatus = Literal["online", "offline", "unknown"]
 class DeviceBase(BaseModel):
     device_name: str = Field(..., min_length=1, max_length=255)
     user_name: str = Field(..., min_length=1, max_length=255)
-    ip_address: str = Field(..., min_length=7, max_length=64)
+    ip_address: str = Field(..., min_length=1, max_length=64)
     location_or_point: str = Field(..., min_length=1, max_length=255)
     notes: Optional[str] = Field(default=None, max_length=1000)
     is_active: bool = True
@@ -25,11 +25,13 @@ class DeviceBase(BaseModel):
     @field_validator("ip_address")
     @classmethod
     def validate_ip(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("IP address or network label is required")
         try:
-            parsed = ip_address(value.strip())
-        except ValueError as exc:
-            raise ValueError("Invalid IP address format") from exc
-        return str(parsed)
+            return str(ip_address(value))
+        except ValueError:
+            return value
 
 
 class DeviceCreate(DeviceBase):
@@ -39,7 +41,7 @@ class DeviceCreate(DeviceBase):
 class DeviceUpdate(BaseModel):
     device_name: Optional[str] = Field(default=None, min_length=1, max_length=255)
     user_name: Optional[str] = Field(default=None, min_length=1, max_length=255)
-    ip_address: Optional[str] = Field(default=None, min_length=7, max_length=64)
+    ip_address: Optional[str] = Field(default=None, min_length=1, max_length=64)
     location_or_point: Optional[str] = Field(default=None, min_length=1, max_length=255)
     notes: Optional[str] = Field(default=None, max_length=1000)
     is_active: Optional[bool] = None
@@ -60,11 +62,13 @@ class DeviceUpdate(BaseModel):
     def validate_ip(cls, value: str | None) -> str | None:
         if value is None:
             return None
+        value = value.strip()
+        if not value:
+            raise ValueError("IP address or network label is required")
         try:
-            parsed = ip_address(value.strip())
-        except ValueError as exc:
-            raise ValueError("Invalid IP address format") from exc
-        return str(parsed)
+            return str(ip_address(value))
+        except ValueError:
+            return value
 
 
 class DeviceOut(DeviceBase):

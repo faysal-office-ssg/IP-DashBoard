@@ -46,6 +46,9 @@ def extract_ping_response_ms(output: str):
 
 
 def ping_ip(ip_address: str):
+    if not re.fullmatch(r"[0-9a-fA-F:.]+", ip_address.strip()):
+        return False, None, "network label cannot be pinged"
+
     command = get_ping_command(ip_address)
     try:
         result = subprocess.run(
@@ -65,7 +68,7 @@ def ping_ip(ip_address: str):
     return success, response_ms, output.strip() or ("ping succeeded" if success else "ping failed")
 
 
-async def ping_device_once(device_id: int):
+def ping_device_once(device_id: int):
     db = SessionLocal()
     try:
         device = db.query(Device).filter(Device.id == device_id).first()
@@ -91,7 +94,10 @@ async def ping_device_once(device_id: int):
         device.last_ping_at = now
         device.last_response_ms = response_ms
 
-        if online:
+        if message == "network label cannot be pinged":
+            device.status = "unknown"
+            device.down_since = None
+        elif online:
             device.status = "online"
             device.down_since = None
         else:
@@ -121,13 +127,22 @@ async def monitor_active_devices():
         db = SessionLocal()
         try:
             devices = db.query(Device).filter(Device.is_active.is_(True)).all()
-            for device in devices:
-                online, response_ms, message = ping_ip(device.ip_address)
-                now = datetime.utcnow()
+            semaphore = asyncio.Semaphore(20)
+
+            async def check_device(device):
+                async with semaphore:
+                    return await asyncio.to_thread(ping_ip, device.ip_address)
+
+            results = await asyncio.gather(*(check_device(device) for device in devices))
+            now = datetime.utcnow()
+            for device, (online, response_ms, message) in zip(devices, results):
                 device.last_ping_at = now
                 device.last_response_ms = response_ms
 
-                if online:
+                if message == "network label cannot be pinged":
+                    device.status = "unknown"
+                    device.down_since = None
+                elif online:
                     device.status = "online"
                     device.down_since = None
                 else:
