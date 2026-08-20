@@ -1,28 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Seven Circle IPAM</title>
-    <link rel="stylesheet" href="css/style.css" />
-  </head>
-  <body>
-    <div class="app-shell">
-      <header class="topbar">
-        <div class="brand-block"><h1>Seven Circle GIS</h1></div>
-        <div class="topbar-actions"><div class="live-status"><span id="auto-refresh-indicator" class="live-dot"></span><span id="connection-label">Live monitoring</span></div><span id="last-updated" class="last-updated">Never</span><button id="refresh-btn" class="top-button" type="button">Refresh</button><button id="add-device-btn" class="top-button top-button-primary" type="button">Add <span aria-hidden="true">+</span></button><button id="settings-btn" class="top-button" type="button">Settings</button></div>
-      </header>
-      <nav class="tabs" aria-label="IPAM sections"><button class="tab active" type="button" data-tab="summary">Summary</button><button class="tab" type="button" data-tab="subnets">Subnet Details</button><button class="tab" type="button" data-tab="ips">IP Details</button><button class="tab" type="button" data-tab="history">IP History</button><button class="tab" type="button" data-tab="alerts">Alerts <span id="alert-count" class="tab-count">0</span></button></nav>
-      <main>
-        <section id="summary-view" class="view active-view"><div class="section-heading"><div><p class="eyebrow">Overview</p><h2>Group Summary</h2></div><span class="section-note">Derived from monitored inventory</span></div><div class="metric-grid"><article class="metric-card"><span>Total IPs</span><strong id="summary-total">0</strong></article><article class="metric-card"><span>Reserved IPs</span><strong id="summary-reserved">0</strong></article><article class="metric-card"><span>Total Subnets</span><strong id="summary-subnets">0</strong></article><article class="metric-card"><span>Used Percentage</span><strong id="summary-used">0%</strong></article><article class="metric-card"><span>Online Devices</span><strong id="summary-online">0</strong></article><article class="metric-card"><span>Offline Devices</span><strong id="summary-offline">0</strong></article><article class="metric-card"><span>Unknown Devices</span><strong id="summary-unknown">0</strong></article><article class="metric-card"><span>Network Labels</span><strong id="summary-labels">0</strong></article></div><div class="analytics-grid"><article class="panel chart-panel"><div class="panel-title"><h3>IP Availability</h3><span>Current inventory</span></div><div class="donut-wrap"><div id="availability-chart" class="donut"><div class="donut-hole"><strong id="availability-used">0%</strong><span>used</span></div></div><div id="availability-legend" class="legend"></div></div></article><article class="panel chart-panel"><div class="panel-title"><h3>Device Status</h3><span>Live checks</span></div><div class="donut-wrap"><div id="status-chart" class="donut"><div class="donut-hole"><strong id="status-online">0</strong><span>online</span></div></div><div id="status-legend" class="legend"></div></div></article><article class="panel chart-panel chart-wide"><div class="panel-title"><h3>Subnet Summary</h3><span id="subnet-count-label">0 subnets</span></div><div id="subnet-chart" class="bar-chart"></div></article></div></section>
-        <section id="subnets-view" class="view"><div class="section-heading"><div><p class="eyebrow">Address space</p><h2>Subnet Details</h2></div><button class="small-button" type="button" data-tab="ips">View IP details</button></div><div id="subnet-table" class="panel table-panel"></div></section>
-        <section id="ips-view" class="view"><div class="section-heading"><div><p class="eyebrow">Inventory</p><h2>IP Details</h2></div><div class="view-controls"><input id="ip-search" class="compact-input" type="search" placeholder="Search IP, user, location" /><select id="ip-status-filter" class="compact-input"><option value="all">All statuses</option><option value="online">Online</option><option value="offline">Offline</option><option value="unknown">Unknown</option></select></div></div><div id="ip-table" class="panel table-panel"></div></section>
-        <section id="history-view" class="view"><div class="section-heading"><div><p class="eyebrow">Activity</p><h2>IP History</h2></div><span class="section-note">Status changes captured in this session</span></div><div id="history-table" class="panel table-panel"></div></section>
-        <section id="alerts-view" class="view"><div class="section-heading"><div><p class="eyebrow">Attention required</p><h2>Alerts</h2></div><span id="alert-summary" class="section-note">No active alerts</span></div><div id="alerts-table" class="panel table-panel"></div></section>
-      </main>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seven Circle IPAM</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-block">
+        <h1>Seven Circle GIS</h1>
+      </div>
+      <div class="topbar-actions">
+        <div class="live-status"><span id="auto-refresh-indicator" class="live-dot"></span><span
+            id="connection-label">Live monitoring</span></div><span id="last-updated"
+          class="last-updated">Never</span><button id="refresh-btn" class="top-button"
+          type="button">Refresh</button><button id="add-device-btn" class="top-button top-button-primary"
+          type="button">Add <span aria-hidden="true">+</span></button><button id="settings-btn" class="top-button"
+          type="button">Settings</button>
+      </div>
+    </header>
+    <nav class="tabs" aria-label="IPAM sections"><button class="tab active" type="button"
+        data-tab="summary">Summary</button><button class="tab" type="button" data-tab="subnets">Subnet
+        Details</button><button class="tab" type="button" data-tab="ips">IP Details</button><button class="tab"
+        type="button" data-tab="history">IP History</button><button class="tab" type="button" data-tab="alerts">Alerts
+        <span id="alert-count" class="tab-count">0</span></button></nav>
+    <main>
+      <section id="summary-view" class="view active-view">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Overview</p>
+            <h2>Group Summary</h2>
+          </div><span class="section-note">Derived from monitored inventory</span>
+        </div>
+        <div class="metric-grid">
+          <article class="metric-card"><span>Total IPs</span><strong id="summary-total">0</strong></article>
+          <article class="metric-card"><span>Reserved IPs</span><strong id="summary-reserved">0</strong></article>
+          <article class="metric-card"><span>Total Subnets</span><strong id="summary-subnets">0</strong></article>
+          <article class="metric-card"><span>Used Percentage</span><strong id="summary-used">0%</strong></article>
+          <article class="metric-card"><span>Online Devices</span><strong id="summary-online">0</strong></article>
+          <article class="metric-card"><span>Offline Devices</span><strong id="summary-offline">0</strong></article>
+          <article class="metric-card"><span>Unknown Devices</span><strong id="summary-unknown">0</strong></article>
+          <article class="metric-card"><span>Network Labels</span><strong id="summary-labels">0</strong></article>
+        </div>
+        <div class="analytics-grid">
+          <article class="panel chart-panel">
+            <div class="panel-title">
+              <h3>IP Availability</h3><span>Current inventory</span>
+            </div>
+            <div class="donut-wrap">
+              <div id="availability-chart" class="donut">
+                <div class="donut-hole"><strong id="availability-used">0%</strong><span>used</span></div>
+              </div>
+              <div id="availability-legend" class="legend"></div>
+            </div>
+          </article>
+          <article class="panel chart-panel">
+            <div class="panel-title">
+              <h3>Device Status</h3><span>Live checks</span>
+            </div>
+            <div class="donut-wrap">
+              <div id="status-chart" class="donut">
+                <div class="donut-hole"><strong id="status-online">0</strong><span>online</span></div>
+              </div>
+              <div id="status-legend" class="legend"></div>
+            </div>
+          </article>
+          <article class="panel chart-panel chart-wide">
+            <div class="panel-title">
+              <h3>Subnet Summary</h3><span id="subnet-count-label">0 subnets</span>
+            </div>
+            <div id="subnet-chart" class="bar-chart"></div>
+          </article>
+        </div>
+      </section>
+      <section id="subnets-view" class="view">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Address space</p>
+            <h2>Subnet Details</h2>
+          </div><button class="small-button" type="button" data-tab="ips">View IP details</button>
+        </div>
+        <div id="subnet-table" class="panel table-panel"></div>
+      </section>
+      <section id="ips-view" class="view">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Inventory</p>
+            <h2>IP Details</h2>
+          </div>
+          <div class="view-controls"><input id="ip-search" class="compact-input" type="search"
+              placeholder="Search IP, user, location" /><select id="ip-status-filter" class="compact-input">
+              <option value="all">All statuses</option>
+              <option value="online">Online</option>
+              <option value="offline">Offline</option>
+              <option value="unknown">Unknown</option>
+            </select></div>
+        </div>
+        <div id="ip-table" class="panel table-panel"></div>
+      </section>
+      <section id="history-view" class="view">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Activity</p>
+            <h2>IP History</h2>
+          </div><span class="section-note">Status changes captured in this session</span>
+        </div>
+        <div id="history-table" class="panel table-panel"></div>
+      </section>
+      <section id="alerts-view" class="view">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Attention required</p>
+            <h2>Alerts</h2>
+          </div><span id="alert-summary" class="section-note">No active alerts</span>
+        </div>
+        <div id="alerts-table" class="panel table-panel"></div>
+      </section>
+    </main>
+  </div>
+  <div id="device-modal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="device-modal-title">
+      <div class="modal-header">
+        <h3 id="device-modal-title">Add Device</h3><button type="button" class="icon-button" data-close="device-modal"
+          aria-label="Close modal">x</button>
+      </div>
+      <form id="device-form">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-field"><label for="device-name">Device name</label><input id="device-name" type="text"
+                required /></div>
+            <div class="form-field"><label for="user-name">User name</label><input id="user-name" type="text"
+                required /></div>
+            <div class="form-field"><label for="ip-address">IP address or label</label><input id="ip-address"
+                type="text" required /></div>
+            <div class="form-field"><label for="location">Location / Point</label><input id="location" type="text"
+                required /></div>
+            <div class="form-field full"><label for="notes">Notes</label><textarea id="notes"></textarea></div>
+            <div class="form-field full"><label class="checkbox-row"><input id="is-active" type="checkbox"
+                  checked /><span>Enable monitoring for this device</span></label></div>
+          </div>
+          <p id="form-status" class="form-status" aria-live="polite"></p>
+        </div>
+        <div class="modal-footer"><button id="cancel-device" type="button" class="ghost-button">Cancel</button><button
+            type="submit" class="button">Save Device</button></div>
+      </form>
     </div>
-    <div id="device-modal" class="modal-backdrop" aria-hidden="true"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="device-modal-title"><div class="modal-header"><h3 id="device-modal-title">Add Device</h3><button type="button" class="icon-button" data-close="device-modal" aria-label="Close modal">x</button></div><form id="device-form"><div class="modal-body"><div class="form-grid"><div class="form-field"><label for="device-name">Device name</label><input id="device-name" type="text" required /></div><div class="form-field"><label for="user-name">User name</label><input id="user-name" type="text" required /></div><div class="form-field"><label for="ip-address">IP address or label</label><input id="ip-address" type="text" required /></div><div class="form-field"><label for="location">Location / Point</label><input id="location" type="text" required /></div><div class="form-field full"><label for="notes">Notes</label><textarea id="notes"></textarea></div><div class="form-field full"><label class="checkbox-row"><input id="is-active" type="checkbox" checked /><span>Enable monitoring for this device</span></label></div></div><p id="form-status" class="form-status" aria-live="polite"></p></div><div class="modal-footer"><button id="cancel-device" type="button" class="ghost-button">Cancel</button><button type="submit" class="button">Save Device</button></div></form></div></div>
-    <div id="delete-confirm-modal" class="modal-backdrop" aria-hidden="true"><div class="modal" role="dialog" aria-modal="true"><div class="modal-header"><h3>Delete Device</h3><button type="button" class="icon-button" data-close="delete-confirm-modal" aria-label="Close modal">x</button></div><div class="modal-body"><p>Remove <strong id="delete-device-name"></strong> from inventory?</p><input id="delete-device-id" type="hidden" /></div><div class="modal-footer"><button id="cancel-delete" type="button" class="ghost-button">Cancel</button><button id="confirm-delete" type="button" class="button">Delete</button></div></div></div>
-    <script src="js/app.js"></script>
-  </body>
+  </div>
+  <div id="delete-confirm-modal" class="modal-backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <h3>Delete Device</h3><button type="button" class="icon-button" data-close="delete-confirm-modal"
+          aria-label="Close modal">x</button>
+      </div>
+      <div class="modal-body">
+        <p>Remove <strong id="delete-device-name"></strong> from inventory?</p><input id="delete-device-id"
+          type="hidden" />
+      </div>
+      <div class="modal-footer"><button id="cancel-delete" type="button" class="ghost-button">Cancel</button><button
+          id="confirm-delete" type="button" class="button">Delete</button></div>
+    </div>
+  </div>
+  <script src="js/app.js"></script>
+</body>
+
 </html>
